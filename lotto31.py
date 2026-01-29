@@ -26,10 +26,18 @@ col1, col2 = st.columns([1, 1])
 # --- [Step 1] 왼쪽: 자동 번호 통합 입력 ---
 with col1:
     st.header("📥 Step 1. 자동 번호 통합 입력")
-    # 사용자가 직접 입력할 수 있는 빈 칸 제공
+    st.caption("영수증의 A~E 게임을 입력하세요.")
+    
+    # 이미지 image_345297.jpg의 실제 번호를 기본값으로 세팅
+    auto_receipt = {
+        'A': "2, 8, 17, 27, 30, 35", 'B': "8, 20, 30, 31, 36, 38",
+        'C': "24, 25, 33, 39, 41, 42", 'D': "4, 19, 20, 25, 28, 29",
+        'E': "6, 22, 24, 25, 41, 43"
+    }
+    
     auto_all = []
     for label in ['A', 'B', 'C', 'D', 'E']:
-        val = st.text_input(f"🎮 자동 게임 {label}", key=f"auto_input_{label}")
+        val = st.text_input(f"🎮 자동 게임 {label}", value=auto_receipt[label], key=f"auto_in_{label}")
         if val:
             auto_all.extend([int(n.strip()) for n in val.split(',') if n.strip().isdigit()])
     
@@ -46,15 +54,54 @@ with col2:
     core_list = [int(n.strip()) for n in user_core.split(',') if n.strip().isdigit()]
     support_list = [int(n.strip()) for n in user_support.split(',') if n.strip().isdigit()]
     
-    # [업데이트] 1208회 당첨 번호를 회귀 데이터셋에 추가
-    reg_data = {
-        6, 27, 30, 36, 38, 42, 25, # 1208회 최신 번호 반영
-        16, 24, 32, 9, 19, 29, 35, 37, 3, 18, 40, 44, 5, 12, 26, 39, 15, 21, 10, 11, 17, 34, 1, 13, 20, 45, 33
-    }
+    # 최신 회귀 데이터셋
+    reg_data = {6, 27, 30, 36, 38, 42, 25, 16, 24, 32, 9, 19, 29, 35, 37, 3, 18, 40, 44, 5, 12, 26, 39, 15, 21, 10, 11, 17, 34, 1, 13, 20, 45, 33}
+
+    # 핵심 매칭 로직
+    matched_c = [n for n in core_list if n in unique_auto and n in reg_data]
+    matched_s = [n for n in support_list if n in unique_auto and n in reg_data]
+    other_pool = [n for n in unique_auto if n in reg_data and n not in core_list and n not in support_list]
+
+    st.write(f"✅ 매칭 핵심수: {matched_c}")
+    st.write(f"✅ 매칭 소외수: {matched_s}")
+
+    st.divider()
 
     if st.button("🚀 1209회 황금 조합 생성", type="primary", use_container_width=True):
         if not unique_auto:
             st.error("먼저 왼쪽 Step 1에 자동 번호를 입력해주세요.")
-        else:
-            # 매칭 및 조합 생성 로직 (생략 - 이전과 동일)
-            st.info("매칭된 번호 기반으로 최적의 조합을 생성합니다.")
+        elif not matched_c and not matched_s:
+            st.warning("전략 번호와 매칭되는 번호가 없습니다. 수동으로 보충합니다.")
+            # 번호 부족 시 전체 unique_auto에서 보충
+            matched_c = matched_c if matched_c else random.sample(unique_auto, min(3, len(unique_auto)))
+            
+        final_combos = []
+        for _ in range(5):
+            try:
+                # 3:2:1 황금 비율 추출 알고리즘
+                c_pick = random.sample(matched_c, min(3, len(matched_c)))
+                s_pick = random.sample(matched_s, min(2, len(matched_s)))
+                o_req = 6 - (len(c_pick) + len(s_pick))
+                o_pick = random.sample(other_pool, min(o_req, len(other_pool)))
+                
+                res = sorted(c_pick + s_pick + o_pick)
+                # 6개가 부족할 경우 자동 번호에서 랜덤 보충
+                while len(res) < 6:
+                    add = random.choice([n for n in unique_auto if n not in res])
+                    res.append(add)
+                    res.sort()
+                final_combos.append(res)
+            except: continue
+        
+        st.session_state.results = final_combos
+
+    # 결과 출력
+    if 'results' in st.session_state:
+        st.subheader("✨ 1209회 추천 조합 (핵심:굵게 / 소외:이탤릭)")
+        for i, combo in enumerate(st.session_state.results, 1):
+            disp = []
+            for n in combo:
+                if n in core_list: disp.append(f"**{n}**")
+                elif n in support_list: disp.append(f"*{n}*")
+                else: disp.append(str(n))
+            st.markdown(f"**조합 {i:02d}:** {' , '.join(disp)}")
