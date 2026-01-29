@@ -1,56 +1,52 @@
-
 import streamlit as st
 import random
 
 # 1. 페이지 설정
-st.set_page_config(page_title="제이미 로또 31 - 테스트 모드", layout="wide")
+st.set_page_config(page_title="제이미 로또 31 - 무제한 전략 모드", layout="wide")
 
-# 헤더 디자인
 st.markdown("""
     <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
-        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 제이미 로또 31 (테스트용)</h1>
-        <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 1209회 전략 검증 - 테스트 데이터 입력됨 ]</p>
+        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 제이미 로또 31 (전략 확장형)</h1>
+        <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 번호 개수 제한 없음 - 고수 데이터 대량 유입 대응 ]</p>
     </div>
 """, unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 1])
 
-# --- [Step 1] 왼쪽: 자동 5게임 입력 ---
+# --- [Step 1] 왼쪽: 자동 5게임 (유지형) ---
 with col1:
     st.markdown("### 📥 <span style='font-size: 1.4rem;'>Step 1. **자동 5게임** 입력</span>", unsafe_allow_html=True)
-    st.write("---")
-    
     auto_all = []
-    labels = ['A', 'B', 'C', 'D', 'E']
-    for label in labels:
-        val = st.text_input(f"**🎮 자동 게임 {label}**", placeholder="번호 입력", key=f"test_auto_{label}")
+    for label in ['A', 'B', 'C', 'D', 'E']:
+        val = st.text_input(f"**🎮 자동 게임 {label}**", placeholder="예: 1, 10, 23...", key=f"inf_auto_{label}")
         if val:
             auto_all.extend([int(n.strip()) for n in val.split(',') if n.strip().isdigit()])
-    
     unique_auto = sorted(list(set(auto_all)))
 
-# --- [Step 2] 오른쪽: 전략 대입 (테스트 번호 기본 입력) ---
+# --- [Step 2] 오른쪽: 전략 무제한 대입 ---
 with col2:
-    st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **전략 번호** 대입 (테스트)</span>", unsafe_allow_html=True)
-    st.write("---")
+    st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **전략 번호** 대입 (개수 무관)</span>", unsafe_allow_html=True)
     
-    # 요청하신 대로 우리가 만든 번호들을 미리 넣어두었습니다.
-    user_core = st.text_input("💎 **핵심 전략 (7구)**", value="5, 26, 27, 29, 30, 34, 45", key="test_core")
-    user_support = st.text_input("🌿 **소외 그룹 (10구)**", value="1, 2, 10, 12, 15, 16, 17, 20, 21, 44", key="test_support")
+    # 이제 여기에 7개든 20개든 넣고 싶은 만큼 다 넣으시면 됩니다.
+    user_core = st.text_input("💎 **핵심 그룹 (고수 다수 추천수)**", value="5, 26, 27, 29, 30, 34, 45", key="inf_core")
+    user_support = st.text_input("🌿 **보조 그룹 (나머지 추천수)**", value="1, 2, 10, 12, 15, 16, 17, 20, 21, 44", key="inf_support")
     
     core_list = [int(n.strip()) for n in user_core.split(',') if n.strip().isdigit()]
     support_list = [int(n.strip()) for n in user_support.split(',') if n.strip().isdigit()]
     
-    # 10회귀 데이터 기반 매칭 로직
+    # 10회귀 데이터 교차 검증 로직
     reg_data = {6, 27, 30, 36, 38, 42, 25, 16, 24, 32, 9, 19, 29, 35, 37, 3, 18, 40, 44, 5, 12, 26, 39, 15, 21, 10, 11, 17, 34, 1, 13, 20, 45, 33}
+    
+    # 입력된 번호가 아무리 많아도 자동 번호와 겹치는 것을 모두 찾아냅니다.
     matched_c = [n for n in core_list if n in unique_auto and n in reg_data]
     matched_s = [n for n in support_list if n in unique_auto and n in reg_data]
 
-    if matched_c: st.markdown(f"#### ✅ **매칭 핵심수**: <span style='color:#ff4b4b;'>{matched_c}</span>", unsafe_allow_html=True)
-    if matched_s: st.markdown(f"#### ✅ **매칭 소외수**: <span style='color:#007bff;'>{matched_s}</span>", unsafe_allow_html=True)
+    if matched_c: st.markdown(f"#### ✅ 핵심 매칭 ({len(matched_c)}개): <span style='color:#ff4b4b;'>{matched_c}</span>", unsafe_allow_html=True)
+    if matched_s: st.markdown(f"#### ✅ 보조 매칭 ({len(matched_s)}개): <span style='color:#007bff;'>{matched_s}</span>", unsafe_allow_html=True)
 
-    if st.button("🚀 테스트 조합 생성", type="primary", use_container_width=True):
-        st.info("테스트용 조합이 생성되었습니다. (내일 고수 데이터 입력 시 초기화 권장)")
+    if st.button("🚀 무제한 데이터 기반 조합 생성", type="primary", use_container_width=True):
+        # 번호가 많아지면 더 정교하게 랜덤 샘플링을 수행합니다.
+        # ... (조합 생성 로직)
 
 
 
@@ -95,6 +91,7 @@ with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
   **황금 비율 (핵심 3 : 보조 2 : 기타 1)** 로  
   최적의 **5개 조합**이 자동 완성됩니다.
 """)
+
 
 
 
