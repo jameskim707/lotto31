@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 # 1. 페이지 설정
-st.set_page_config(page_title="제이미 로또 31 - 1209회 실전", layout="wide")
+st.set_page_config(page_title="로또네오45 - 1209회 실전", layout="wide")
 
 st.markdown("""
     <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
@@ -120,5 +120,6 @@ with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
 - 너무 많지 않아 **비교·선택이 쉽고**  
 - 집중도가 높아 **실사용에 적합**하기 때문입니다.
 """)
+
 
 
