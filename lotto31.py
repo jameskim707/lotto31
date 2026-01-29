@@ -27,8 +27,8 @@ support_12= [1, 2, 10, 11, 12,15, 16, 17, 18,20,21,44]
 
 with st.sidebar:
     st.header("⚙️ 전략 설정")
-    st.success(f"핵심 11구: {len(core_11)}개")
-    st.info(f"소외 16구: {len(support_16)}개")
+    st.success(f"핵심 7구: {len(core_07)}개")
+    st.info(f"소외 12구: {len(support_12)}개")
 
 st.title("🎰 제이미 로또 31 - 계단식 분석기")
 st.caption("1199회~1109회 구간 10회차 단위 자동 수집")
@@ -88,5 +88,6 @@ if st.button("🚀 계단식 분석 및 조합 생성 시작", type="primary"):
             
             st.info(f"✨ 추천 조합: {sorted(c_picks + s_picks + o_picks)}")
             if is_cold_low: st.warning("⚠️ 이 구간은 콜드수가 10개 미만입니다. 콜드수를 제외하고 조합했습니다.")
+
 
 
