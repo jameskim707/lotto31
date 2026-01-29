@@ -77,7 +77,7 @@ with col2:
 
 st.markdown("## 📘 설명란")
 
-with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
+with st.expander("로또네오45 엔진 사용 설명서", expanded=False):
     st.markdown("""
 #### 🔹 1단계: 자동 데이터 확보
 **입력 방법**  
@@ -120,6 +120,7 @@ with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
 - 너무 많지 않아 **비교·선택이 쉽고**  
 - 집중도가 높아 **실사용에 적합**하기 때문입니다.
 """)
+
 
 
 
