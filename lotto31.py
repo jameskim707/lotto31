@@ -7,7 +7,7 @@ st.set_page_config(page_title="제이미 로또 31 - 1209회 실전", layout="wi
 st.markdown("""
     <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
         <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 제이미 로또 31 (1209회)</h1>
-        <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 실시간 자동 매칭 & 고수 데이터 분석 시스템 ]</p>
+        <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 실시간 자동 매칭 & 데이터 분석 시스템 ]</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -86,3 +86,4 @@ with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
 ### 🔹 3단계: 매칭 및 조합 생성
 내 자동 번호와 고수 추천이 일치하는 번호를 기반으로 **최적의 조합**을 추출합니다.
 """)
+
