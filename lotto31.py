@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime, timedelta
 import pandas as pd
 from collections import Counter
 import random
@@ -9,7 +10,20 @@ import urllib3
 # 보안 설정
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-st.set_page_config(page_title="제이미 로또 31 - 클린 모드", layout="wide")
+# --- [추가] 회차 자동 계산 로직 ---
+def get_current_round():
+    # 기준 날짜: 2026년 1월 31일 (1209회)
+    base_date = datetime(2026, 1, 31)
+    base_round = 1209
+    
+    today = datetime.now()
+    # 기준일로부터 차이 계산 (주 단위)
+    weeks_diff = (today - base_date).days // 7
+    return base_round + weeks_diff
+
+auto_round = get_current_round()
+
+st.set_page_config(page_title="제이미 로또 31 - 자동 회차 모드", layout="wide")
 
 # 로또 API 수집 함수
 def get_lotto_data(drw_no):
@@ -23,56 +37,55 @@ def get_lotto_data(drw_no):
         return None
     return None
 
-# --- [전략 번호: 코드 내부에만 존재] ---
+# 전략 번호 (코드 내부 저장)
 core_7 = [5, 26, 27, 29, 30, 34, 45]
 support_12 = [1, 2, 10, 11, 12, 15, 16, 17, 18, 20, 21, 44]
 
-# 사이드바: 번호 리스트 숨김 처리
+# 사이드바 (깔끔하게 정리)
 with st.sidebar:
-    st.header("⚙️ 전략 시스템")
-    st.success("💎 핵심 7구 필터링 활성화")
-    st.info("🌿 소외 12구 필터링 활성화")
+    st.header("🎯 시스템 상태")
+    st.success("💎 핵심 7구/12구 전략 가동 중")
+    st.info(f"📅 오늘 기준 예상 회차: {auto_round}회")
     st.divider()
-    st.caption("사용자님의 비공개 전략 번호가 시스템에 반영되어 있습니다.")
+    st.caption("좌측 번호 노출을 차단했습니다.")
 
-st.title("🎰 제이미 로또 31 - 계단식 분석 엔진 (Clean)")
-st.caption("1199회부터 10회차 단위 자동 수집 및 흐름 분석")
+st.title("🎰 제이미 로또 31 - 자동 회차 분석기")
+st.caption(f"현재 {auto_round}회차를 기준으로 10회씩 계단식 분석을 수행합니다.")
 
-# 분석 구간 설정
+# 분석 설정 (자동 계산된 회차가 기본값으로 들어감)
 col1, col2 = st.columns(2)
 with col1:
-    start_rd = st.number_input("분석 시작 회차", value=1199)
+    # value=auto_round를 통해 자동으로 1209회가 뜨게 설정함
+    start_rd = st.number_input("분석 시작 회차", value=auto_round)
 with col2:
-    num_steps = st.slider("분석할 계단(Step) 수", 1, 10, 10)
+    num_steps = st.slider("분석 구간(Step) 수", 1, 10, 10)
 
-if st.button("🚀 계단식 분석 시작", type="primary"):
+if st.button("🚀 자동 분석 및 조합 생성 시작", type="primary"):
     for i in range(num_steps):
         curr_start = start_rd - (i * 10)
         curr_end = curr_start - 9
         
         segment_nums = []
-        status_text = st.empty()
+        status = st.empty()
         
         for r_no in range(curr_start, curr_end - 1, -1):
-            status_text.text(f"⏳ {r_no}회 데이터 가져오는 중...")
+            status.text(f"⏳ {r_no}회 데이터 자동 수집 중...")
             nums = get_lotto_data(r_no)
             if nums:
                 segment_nums.extend(nums)
                 time.sleep(0.3)
         
-        status_text.empty()
+        status.empty()
 
         if len(segment_nums) >= 30:
             freq = Counter(segment_nums)
             solid = [n for n, c in freq.items() if 1 <= c <= 2]
             cold = [n for n in range(1, 46) if n not in freq]
 
-            # 결과 리포트
-            with st.expander(f"📊 {curr_start}회 ~ {curr_end}회 구간 분석 (상세 보기)"):
-                st.write(f"✅ **이 구간 실속수:** {sorted(solid)}")
-                st.write(f"❄️ **이 구간 콜드수:** {sorted(cold)} ({len(cold)}개)")
+            with st.expander(f"📊 {curr_start}회 ~ {curr_end}회 구간 (콜드수: {len(cold)}개)"):
+                st.write(f"✅ **실속수:** {sorted(solid)}")
+                st.write(f"❄️ **콜드수:** {sorted(cold)}")
                 
-                # 콜드수 10개 미만 체크 및 조합
                 is_cold_low = len(cold) < 10
                 available = [n for n in range(1, 46) if n not in (cold if is_cold_low else [])]
                 
@@ -82,6 +95,6 @@ if st.button("🚀 계단식 분석 시작", type="primary"):
                     others = [n for n in available if n not in c_picks + s_picks]
                     o_pick = random.sample(others, 1)
                     
-                    st.success(f"✨ 추천 조합: {sorted(c_picks + s_picks + o_pick)}")
+                    st.success(f"✨ 추출 조합: {sorted(c_picks + s_picks + o_pick)}")
                 except:
-                    st.warning("⚠️ 분석 조건에 맞는 번호 조합이 부족합니다.")
+                    st.warning("⚠️ 조건 만족 번호 부족")
