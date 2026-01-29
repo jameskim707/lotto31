@@ -108,7 +108,9 @@ with col2:
 
 
 
-with st.expander("📘 제이미 로또 31 엔진 사용 설명서", expanded=False):
+st.markdown("## 📘 설명란")
+
+with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
     st.markdown("""
 ### 🔹 1단계: 자동 데이터 확보 (Step 1)
 **입력 방법**  
@@ -147,4 +149,3 @@ with st.expander("📘 제이미 로또 31 엔진 사용 설명서", expanded=Fa
   **황금 비율 (핵심 3 : 보조 2 : 기타 1)** 로  
   최적의 **5개 조합**이 자동 완성됩니다.
 """)
-
