@@ -1,30 +1,32 @@
+
 import streamlit as st
 import random
 
 # 1. 페이지 설정
-st.set_page_config(page_title="제이미 로또 31 - 데이터 보존 모드", layout="wide")
+st.set_page_config(page_title="제이미 로또 31 - 5게임 최적화", layout="wide")
 
 # 헤더 디자인
 st.markdown("""
     <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
-        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.8rem; font-weight: 900;">🎰 제이미 로또 31 분석기</h1>
-        <p style="color: #333; font-size: 1.3rem; font-weight: bold;">[ 1209회 대비 - 데이터 유지 모드 ]</p>
+        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 제이미 로또 31 분석기</h1>
+        <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 1209회 대비 - 자동 5게임 최적화 모드 ]</p>
     </div>
 """, unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 1])
 
-# --- [Step 1] 왼쪽: 자동 입력 (입력값 유지) ---
+# --- [Step 1] 왼쪽: 자동 5게임 입력 (A~E) ---
 with col1:
-    st.markdown("### 📥 <span style='font-size: 1.5rem;'>Step 1. **자동 10게임** 입력</span>", unsafe_allow_html=True)
+    st.markdown("### 📥 <span style='font-size: 1.4rem;'>Step 1. **자동 5게임** 입력</span>", unsafe_allow_html=True)
     st.write("---")
     
     auto_all = []
-    labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+    # 사용자님의 요청대로 딱 5개(A~E)만 배치했습니다.
+    labels = ['A', 'B', 'C', 'D', 'E']
     
-    # st.text_input의 key 값을 고정하여 세션 내내 값이 유지되도록 함
     for label in labels:
-        val = st.text_input(f"**🎮 게임 {label}**", placeholder="번호 입력 (예: 1, 2, 3...)", key=f"stable_auto_{label}")
+        # 입력 시 값이 유지되도록 key를 설정하고 빈칸으로 시작합니다.
+        val = st.text_input(f"**🎮 자동 게임 {label}**", placeholder="예: 2, 8, 17, 27, 30, 35", key=f"fixed_5_auto_{label}")
         if val:
             auto_all.extend([int(n.strip()) for n in val.split(',') if n.strip().isdigit()])
     
@@ -32,27 +34,26 @@ with col1:
     if unique_auto:
         st.success(f"**📋 추출 번호 ({len(unique_auto)}개):** {unique_auto}")
 
-# --- [Step 2] 오른쪽: 전략 대입 (입력값 유지) ---
+# --- [Step 2] 오른쪽: 전략 번호 대입 ---
 with col2:
-    st.markdown("### 🎯 <span style='font-size: 1.5rem;'>Step 2. **전략 번호** 대입</span>", unsafe_allow_html=True)
+    st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **전략 번호** 대입</span>", unsafe_allow_html=True)
     st.write("---")
     
-    # 전략 입력창도 세션 유지를 위해 고정 key 사용
-    user_core = st.text_input("💎 **핵심 전략 (7구+)**", placeholder="내일 고수 추천 상위 번호", key="stable_core")
-    user_support = st.text_input("🌿 **보조 소외 (10구+)**", placeholder="보험용 번호 입력", key="stable_support")
+    user_core = st.text_input("💎 **핵심 전략 (7구+)**", placeholder="내일 고수 추천 상위 번호", key="fixed_core")
+    user_support = st.text_input("🌿 **보조 소외 (10구+)**", placeholder="보험용 번호 입력", key="fixed_support")
     
     core_list = [int(n.strip()) for n in user_core.split(',') if n.strip().isdigit()]
     support_list = [int(n.strip()) for n in user_support.split(',') if n.strip().isdigit()]
     
-    # 회귀 흐름 데이터
+    # 10회귀 흐름 데이터
     reg_data = {6, 27, 30, 36, 38, 42, 25, 16, 24, 32, 9, 19, 29, 35, 37, 3, 18, 40, 44, 5, 12, 26, 39, 15, 21, 10, 11, 17, 34, 1, 13, 20, 45, 33}
     
     matched_c = [n for n in core_list if n in unique_auto and n in reg_data]
     matched_s = [n for n in support_list if n in unique_auto and n in reg_data]
     other_pool = [n for n in unique_auto if n in reg_data if n not in core_list + support_list]
 
-    if matched_c: st.markdown(f"#### ✅ **매칭 핵심수**: <span style='color:#ff4b4b; font-size:1.4rem;'>{matched_c}</span>", unsafe_allow_html=True)
-    if matched_s: st.markdown(f"#### ✅ **매칭 소외수**: <span style='color:#007bff; font-size:1.4rem;'>{matched_s}</span>", unsafe_allow_html=True)
+    if matched_c: st.markdown(f"#### ✅ **매칭 핵심수**: <span style='color:#ff4b4b; font-size:1.3rem;'>{matched_c}</span>", unsafe_allow_html=True)
+    if matched_s: st.markdown(f"#### ✅ **매칭 소외수**: <span style='color:#007bff; font-size:1.3rem;'>{matched_s}</span>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -71,11 +72,9 @@ with col2:
                 except: continue
             
             if final_combos:
-                st.markdown("### ✨ **생성된 황금 조합**")
+                st.markdown("### ✨ **최종 추천 조합**")
                 for i, combo in enumerate(final_combos, 1):
                     st.info(f"**조합 {i:02d} :** {', '.join(map(str, combo))}")
-
-
 st.markdown("## 📘 설명란")
 
 with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
@@ -117,4 +116,5 @@ with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
   **황금 비율 (핵심 3 : 보조 2 : 기타 1)** 로  
   최적의 **5개 조합**이 자동 완성됩니다.
 """)
+
 
