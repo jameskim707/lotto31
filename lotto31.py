@@ -6,7 +6,7 @@ st.set_page_config(page_title="로또네오45 - 1209회 실전", layout="wide")
 
 st.markdown("""
     <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
-        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 제이미 로또 31 (1209회)</h1>
+        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 로또네오45 (1209회)</h1>
         <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 실시간 자동 매칭 & 데이터 분석 시스템 ]</p>
     </div>
 """, unsafe_allow_html=True)
@@ -120,6 +120,7 @@ with st.expander("제이미 로또 31 엔진 사용 설명서", expanded=False):
 - 너무 많지 않아 **비교·선택이 쉽고**  
 - 집중도가 높아 **실사용에 적합**하기 때문입니다.
 """)
+
 
 
 
