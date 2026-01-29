@@ -1,111 +1,91 @@
 import streamlit as st
-from datetime import datetime
-import pandas as pd
+from datetime import datetime, timedelta
 from collections import Counter
 import random
-import requests
-import time
-import urllib3
 
-# 보안 설정
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# 1. 사용자 제공 데이터 내장 (1199회 ~ 1109회)
+# 이 데이터는 분석 로직에 즉시 반영됩니다.
+STEP_DATA = {
+    1199: [16, 24, 25, 30, 31, 32],
+    1189: [9, 19, 29, 35, 37, 38],
+    1179: [3, 16, 18, 24, 40, 44],
+    1169: [5, 12, 24, 26, 39, 42],
+    1159: [3, 9, 27, 28, 38, 39],
+    1149: [8, 15, 19, 21, 32, 36],
+    1139: [5, 12, 15, 30, 37, 40],
+    1129: [5, 10, 11, 17, 28, 34],
+    1119: [1, 9, 12, 13, 20, 45],
+    1109: [10, 12, 13, 19, 33, 40]
+}
 
-# --- [정밀 계산] 이번 주 정보 자동 추출 ---
-def get_this_week_info():
-    # 기준: 1208회 (2026년 1월 24일 토요일)
-    base_date = datetime(2026, 1, 24)
-    base_round = 1208
-    
-    today = datetime.now()
-    weeks_diff = (today - base_date).days // 7
-    
-    this_round = base_round + weeks_diff + 1
-    this_date = base_date + timedelta(weeks=(weeks_diff + 1))
-    return this_round, this_date.strftime("%Y년 %m월 %d일")
+# 2. 이번 주 회차 정보 자동 계산
+def get_this_week():
+    base_round = 1209
+    base_date = datetime(2026, 1, 31)
+    return base_round, base_date.strftime("%Y년 %m월 %d일")
 
-from datetime import timedelta
-auto_round, target_date = get_this_week_info()
+auto_round, target_date = get_this_week()
 
-st.set_page_config(page_title="제이미 로또 31 - 분석 엔진", layout="wide")
-
-# 로또 API 수집 함수
-def get_lotto_data(drw_no):
-    url = f"https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo={drw_no}"
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    try:
-        res = requests.get(url, headers=headers, timeout=5, verify=False).json()
-        if res.get('returnValue') == 'success':
-            return [res[f'drwtNo{i}'] for i in range(1, 7)]
-    except:
-        return None
-    return None
-
-# 전략 번호 (내부 고정)
+# 3. 전략 번호 (7구 / 12구)
 core_7 = [5, 26, 27, 29, 30, 34, 45]
 support_12 = [1, 2, 10, 11, 12, 15, 16, 17, 18, 20, 21, 44]
 
-# --- 상단 타이틀 및 중앙 날짜 표시 ---
-st.markdown("<h1 style='text-align: center;'>🎰 제이미 로또 31 분석 엔진</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="제이미 로또 31 - 초고속 분석", layout="wide")
 
-# 화면 중앙에 당첨 예정일과 회차를 크게 배치
+# --- 좌측 사이드바: 카피용 데이터 리스트 ---
+with st.sidebar:
+    st.header("📋 데이터 카피존")
+    st.write("블로그 포스팅용 텍스트")
+    copy_text = ""
+    for r in sorted(STEP_DATA.keys(), reverse=True):
+        copy_text += f"{r} 회\t" + "\t".join(map(str, STEP_DATA[r])) + "\n"
+    st.text_area("Ctrl+C로 복사하세요", copy_text, height=400)
+    st.divider()
+    st.success("💎 핵심 7구/12구 전략 가동")
+
+# --- 메인 상단: 이번 주 정보 (가운데 정렬) ---
 st.markdown(f"""
-    <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; border: 2px solid #ff4b4b; text-align: center; margin: 20px 0;">
-        <h3 style="margin: 0; color: #31333F;">📅 이번 주 추첨일: <span style="color: #ff4b4b;">{target_date}</span></h3>
-        <h2 style="margin: 10px 0; color: #31333F;">제 <span style="color: #ff4b4b;">{auto_round}</span> 회</h2>
+    <div style="text-align: center; border: 2px solid #ff4b4b; padding: 20px; border-radius: 15px; background-color: #f9f9f9; margin-bottom: 30px;">
+        <h2 style="margin: 0; color: #333;">📅 이번 주 당첨일: <span style="color: #ff4b4b;">{target_date}</span></h2>
+        <h1 style="margin: 10px 0; font-size: 3.5rem;">제 {auto_round} 회</h1>
+        <p style="color: #666; font-size: 1.1rem;">제이미 로또 31 - 계단식 회귀 분석 시스템</p>
     </div>
 """, unsafe_allow_html=True)
 
-with st.sidebar:
-    st.header("⚙️ 전략 가동 상태")
-    st.success("💎 핵심 7구 필터링 ON")
-    st.info("🌿 소외 12구 필터링 ON")
+# 분석 실행 버튼
+if st.button("🚀 초고속 계단식 분석 실행", type="primary", use_container_width=True):
+    # 제공된 10개 데이터를 기반으로 분석 수행
+    all_numbers = [n for nums in STEP_DATA.values() for n in nums]
+    freq = Counter(all_numbers)
+    
+    # 전체 요약 리포트
+    st.subheader("📊 10개 계단 구간 통합 분석")
+    col_a, col_b, col_c = st.columns(3)
+    
+    hot = [n for n, c in freq.items() if c >= 3]
+    solid = [n for n, c in freq.items() if 1 <= c <= 2]
+    cold = [n for n in range(1, 46) if n not in freq]
+    
+    col_a.metric("🔥 과열수", f"{len(hot)}개")
+    col_b.metric("💎 실속수", f"{len(solid)}개")
+    col_c.metric("❄️ 콜드수", f"{len(cold)}개")
+    
     st.divider()
-    st.write(f"현재 분석 기준: {auto_round}회")
 
-# 분석 설정 구간
-col1, col2 = st.columns(2)
-with col1:
-    start_rd = st.number_input("분석 시작 회차 (자동 입력됨)", value=auto_round)
-with col2:
-    num_steps = st.slider("분석 구간(Step) 수", 1, 10, 10)
-
-if st.button("🚀 계단식 분석 및 조합 생성 시작", type="primary", use_container_width=True):
-    for i in range(num_steps):
-        curr_start = (start_rd - 1) - (i * 10)
-        curr_end = curr_start - 9
-        
-        segment_nums = []
-        status = st.empty()
-        
-        for r_no in range(curr_start, curr_end - 1, -1):
-            status.text(f"⏳ {r_no}회 수집 중...")
-            nums = get_lotto_data(r_no)
-            if nums:
-                segment_nums.extend(nums)
-                time.sleep(0.3)
-        
-        status.empty()
-
-        if len(segment_nums) >= 30:
-            freq = Counter(segment_nums)
-            solid = [n for n, c in freq.items() if 1 <= c <= 2]
-            cold = [n for n in range(1, 46) if n not in freq]
-
-            with st.expander(f"📊 {curr_start}회 ~ {curr_end}회 분석 리포트"):
-                c1, c2 = st.columns(2)
-                with c1: st.write(f"✅ **실속수:** {sorted(solid)}")
-                with c2: st.write(f"❄️ **콜드수:** {sorted(cold)} ({len(cold)}개)")
-                
-                is_cold_low = len(cold) < 10
-                available = [n for n in range(1, 46) if n not in (cold if is_cold_low else [])]
-                
-                try:
-                    c_picks = random.sample([n for n in available if n in core_7], 3)
-                    s_picks = random.sample([n for n in available if n in support_12], 2)
-                    others = [n for n in available if n not in c_picks + s_picks]
-                    o_pick = random.sample(others, 1)
-                    
-                    st.success(f"✨ 추천 조합: {sorted(c_picks + s_picks + o_pick)}")
-                    if is_cold_low: st.caption("💡 콜드수 10개 미만 전략으로 자동 필터링됨")
-                except:
-                    st.warning("⚠️ 해당 구간 분석 조건에 맞는 번호 부족")
+    # 각 계단별 세부 분석 및 조합
+    for r in sorted(STEP_DATA.keys(), reverse=True):
+        with st.expander(f"📍 {r}회차 기준 분석 및 추천 조합"):
+            current_nums = STEP_DATA[r]
+            st.write(f"✅ 당첨번호: **{current_nums}**")
+            
+            # 전략 적용 (콜드수 10개 미만 시 제거 등)
+            # 여기서는 전체 10개 계단 통합 콜드수 기준으로 시뮬레이션
+            available = [n for n in range(1, 46) if n not in (cold if len(cold) < 10 else [])]
+            
+            try:
+                c_picks = random.sample([n for n in available if n in core_7], 3)
+                s_picks = random.sample([n for n in available if n in support_12], 2)
+                o_pick = random.sample([n for n in available if n not in c_picks+s_picks], 1)
+                st.success(f"✨ 추천: {sorted(c_picks + s_picks + o_pick)}")
+            except:
+                st.warning("조합 조건 부족")
