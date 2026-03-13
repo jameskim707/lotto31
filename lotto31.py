@@ -21,7 +21,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ===== 사이드바: 마스터 번호 (한달 고정) =====
+# ===== 사이드바 =====
 with st.sidebar:
     st.markdown("### 🔐 마스터 번호")
     st.caption("한달에 한번 업데이트")
@@ -30,7 +30,35 @@ with st.sidebar:
     master_list = sorted([int(n.strip()) for n in master_input.split(',') if n.strip().isdigit()])
     st.success(f"✅ 마스터 {len(master_list)}개")
 
-master_set = set(master_list)
+    st.markdown("---")
+    st.markdown("### ❌ 제외수")
+    st.caption("마스터에서 뺄 번호")
+    exclude_input = st.text_input("제외수 입력", placeholder="예: 3, 15, 27")
+    exclude_list = sorted([int(n.strip()) for n in exclude_input.split(',') if n.strip().isdigit()])
+
+    # 최종 마스터 = 마스터 - 제외수
+    final_master_list = sorted(set(master_list) - set(exclude_list))
+    st.markdown("### ✅ 최종 마스터")
+    st.caption(f"{len(final_master_list)}개 (실제 사용)")
+    final_chips = " ".join([
+        f'<span style="background:#1a5c2a;color:#7fff9a;padding:3px 8px;border-radius:10px;margin:2px;display:inline-block;font-weight:bold;">{n}</span>'
+        for n in final_master_list
+    ])
+    st.markdown(final_chips, unsafe_allow_html=True)
+
+    st.markdown("---")
+    # 변수번호 = 45개 중 마스터 제외 (참고용)
+    variable_list = sorted(set(range(1, 46)) - set(master_list))
+    st.markdown("### 💣 변수번호")
+    st.caption(f"참고용 {len(variable_list)}개")
+    var_chips = " ".join([
+        f'<span style="background:#2a2a4a;color:#f0a500;padding:3px 8px;border-radius:10px;margin:2px;display:inline-block;font-weight:bold;">{n}</span>'
+        for n in variable_list
+    ])
+    st.markdown(var_chips, unsafe_allow_html=True)
+
+# 실제 사용할 마스터셋 = 최종 마스터
+master_set = set(final_master_list)
 
 # ===== session_state 초기화 =====
 if 'auto_core' not in st.session_state:
@@ -80,7 +108,7 @@ with tab1:
         core_calc = sorted(master_set & nb_set)
         support_calc = sorted(master_set - nb_set)
 
-        # session_state에 저장 (탭3 자동 연동!)
+        # 탭3 자동 연동
         st.session_state.auto_core = ", ".join(map(str, core_calc))
         st.session_state.auto_support = ", ".join(map(str, support_calc))
 
@@ -102,7 +130,6 @@ with tab1:
             st.markdown(sup_ch, unsafe_allow_html=True)
 
         st.success("✅ 핵심/보조 번호가 조합 생성기 탭에 자동 연동됐어요!")
-
     else:
         st.info("👈 당첨번호와 보너스번호를 입력하면 이웃수가 자동으로 계산됩니다!")
 
@@ -111,7 +138,7 @@ with tab1:
 # ==========================================
 with tab2:
     st.markdown("### 🎯 추천번호 매칭")
-    st.caption("추천번호나 예상번호를 넣으면 마스터 28개와 매칭해드려요!")
+    st.caption("추천번호나 예상번호를 넣으면 최종 마스터와 매칭해드려요!")
 
     rec_input = st.text_area("📋 추천번호 입력 (쉼표로 구분)", placeholder="예: 3, 7, 12, 18, 24, 27, 33, 38, 41, 44", height=80)
     rec_nums = sorted([int(n.strip()) for n in rec_input.split(',') if n.strip().isdigit()])
@@ -135,7 +162,6 @@ with tab2:
                 st.markdown(chips, unsafe_allow_html=True)
             else:
                 st.warning("일치하는 번호가 없어요")
-
         with col_b:
             st.markdown(f"**❌ 마스터 미포함 ({len(not_matched)}개)**")
             if not_matched:
@@ -145,10 +171,10 @@ with tab2:
                 ])
                 st.markdown(chips, unsafe_allow_html=True)
     else:
-        st.info("👈 추천번호를 입력하면 마스터 28개와 매칭해드립니다!")
+        st.info("👈 추천번호를 입력하면 최종 마스터와 매칭해드립니다!")
 
 # ==========================================
-# TAB 3: 조합 생성기 (핵심/보조 자동 연동!)
+# TAB 3: 조합 생성기
 # ==========================================
 with tab3:
     st.markdown("""
@@ -163,8 +189,7 @@ with tab3:
     with col1:
         st.markdown("### 📥 <span style='font-size: 1.4rem;'>Step 1. **자동 5게임** 입력</span>", unsafe_allow_html=True)
         auto_all = []
-        labels = ['A', 'B', 'C', 'D', 'E']
-        for label in labels:
+        for label in ['A', 'B', 'C', 'D', 'E']:
             val = st.text_input(f"**🎮 자동 게임 {label}**", placeholder="예: 2, 8, 17...", key=f"final_v1_auto_{label}")
             if val:
                 auto_all.extend([int(n.strip()) for n in val.split(',') if n.strip().isdigit()])
@@ -175,7 +200,6 @@ with tab3:
     with col2:
         st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **이번 주 전략 번호 대입**</span>", unsafe_allow_html=True)
 
-        # 탭1에서 자동 연동!
         user_core = st.text_input("💎 **핵심 그룹**", value=st.session_state.auto_core, key="final_v1_core")
         user_support = st.text_input("🌿 **보조 그룹**", value=st.session_state.auto_support, key="final_v1_support")
 
@@ -223,16 +247,15 @@ with tab3:
     with st.expander("로또네오45 엔진 사용 설명서", expanded=False):
         st.markdown("""
 #### 🔹 사용 순서
-1. **탭1 이웃수 계산기** → 직전 회차 당첨번호+보너스 입력 → 핵심/보조 자동분류
-2. **탭3 조합 생성기** → 핵심/보조 자동 연동 확인 → 자동번호 5게임 입력 → 조합 생성!
+1. **탭1 이웃수 계산기** → 직전 회차 당첨번호+보너스 입력 → 핵심/보조 자동분류 → 탭3 자동연동
+2. **탭2 추천번호 매칭** → 전문가/유튜버 추천번호 입력 → 최종 마스터와 매칭 → 일치번호 확인
+3. **탭3 조합 생성기** → 자동번호 5게임 입력 → 황금조합 생성!
 
-#### 🔹 탭2 추천번호 매칭
-전문가나 유튜버 추천번호를 입력하면 마스터 28개와 비교해서 일치하는 번호만 뽑아줘요.
-마스터에 없는 번호는 자동으로 걸러지고, 일치한 번호만 핵심후보로 활용하세요!
-
-#### 🔹 마스터 번호
-왼쪽 사이드바에서 한달에 한번 업데이트하세요. (후나츠 분석으로 추출한 28개 고정번호)
+#### 🔹 사이드바 구성
+- **마스터 28개**: 한달 고정 (후나츠 분석으로 추출)
+- **제외수**: 이번 주 뺄 번호 입력 → 최종 마스터 자동 계산
+- **변수번호**: 참고용 (마스터 제외 나머지 17개)
         """)
 
 st.markdown("---")
-st.caption("💡 탭1 이웃수 → 탭3 자동연동 | 마스터 28개: 한달 고정 | 매주 당첨번호만 입력!")
+st.caption("💡 탭1 이웃수 → 탭3 자동연동 | 제외수 빼면 최종마스터 자동반영 | 변수번호는 참고용!")
