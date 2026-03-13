@@ -29,15 +29,20 @@ with st.sidebar:
     master_input = st.text_area("💎 마스터 28개", value=default_master, height=120)
     master_list = sorted([int(n.strip()) for n in master_input.split(',') if n.strip().isdigit()])
     st.success(f"✅ 마스터 {len(master_list)}개")
-    st.write(master_list)
 
 master_set = set(master_list)
+
+# ===== session_state 초기화 =====
+if 'auto_core' not in st.session_state:
+    st.session_state.auto_core = ""
+if 'auto_support' not in st.session_state:
+    st.session_state.auto_support = ""
 
 # ===== 탭 구조 =====
 tab1, tab2, tab3 = st.tabs(["🔢 이웃수 계산기", "🎯 추천번호 매칭", "🚀 조합 생성기"])
 
 # ==========================================
-# TAB 1: 이웃수 계산기 (새로 추가)
+# TAB 1: 이웃수 계산기
 # ==========================================
 with tab1:
     st.markdown("### 🔢 이웃수 자동 계산기")
@@ -75,6 +80,10 @@ with tab1:
         core_calc = sorted(master_set & nb_set)
         support_calc = sorted(master_set - nb_set)
 
+        # session_state에 저장 (탭3 자동 연동!)
+        st.session_state.auto_core = ", ".join(map(str, core_calc))
+        st.session_state.auto_support = ", ".join(map(str, support_calc))
+
         col_a, col_b = st.columns(2)
         with col_a:
             st.markdown(f"**💎 핵심그룹 ({len(core_calc)}개)**")
@@ -92,9 +101,10 @@ with tab1:
             ])
             st.markdown(sup_ch, unsafe_allow_html=True)
 
+        st.success("✅ 핵심/보조 번호가 조합 생성기 탭에 자동 연동됐어요!")
+
     else:
         st.info("👈 당첨번호와 보너스번호를 입력하면 이웃수가 자동으로 계산됩니다!")
-
 
 # ==========================================
 # TAB 2: 추천번호 매칭
@@ -138,7 +148,7 @@ with tab2:
         st.info("👈 추천번호를 입력하면 마스터 28개와 매칭해드립니다!")
 
 # ==========================================
-# TAB 3: 기존 조합 생성기 (손 안 댐)
+# TAB 3: 조합 생성기 (핵심/보조 자동 연동!)
 # ==========================================
 with tab3:
     st.markdown("""
@@ -165,16 +175,18 @@ with tab3:
     with col2:
         st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **이번 주 전략 번호 대입**</span>", unsafe_allow_html=True)
 
-        user_core = st.text_input("💎 **핵심 그룹 (고수 다수 추천)**", value="5, 26, 27, 29, 30, 34, 45", key="final_v1_core")
-        user_support = st.text_input("🌿 **보조 그룹 (보험용 추천)**", value="1, 2, 10, 12, 15, 16, 17, 20, 21, 44", key="final_v1_support")
+        # 탭1에서 자동 연동!
+        user_core = st.text_input("💎 **핵심 그룹**", value=st.session_state.auto_core, key="final_v1_core")
+        user_support = st.text_input("🌿 **보조 그룹**", value=st.session_state.auto_support, key="final_v1_support")
+
+        if st.session_state.auto_core:
+            st.caption("✅ 이웃수 계산기에서 자동 연동됨!")
 
         core_list = [int(n.strip()) for n in user_core.split(',') if n.strip().isdigit()]
         support_list = [int(n.strip()) for n in user_support.split(',') if n.strip().isdigit()]
 
-        reg_data = {6, 27, 30, 36, 38, 42, 25, 16, 24, 32, 9, 19, 29, 35, 37, 3, 18, 40, 44, 5, 12, 26, 39, 15, 21, 10, 11, 17, 34, 1, 13, 20, 45, 33}
-
-        matched_c = [n for n in core_list if n in unique_auto and n in reg_data]
-        matched_s = [n for n in support_list if n in unique_auto and n in reg_data]
+        matched_c = [n for n in core_list if n in unique_auto]
+        matched_s = [n for n in support_list if n in unique_auto]
 
         if matched_c:
             st.markdown(f"#### ✅ 핵심 매칭: <span style='color:#ff4b4b;'>{matched_c}</span>", unsafe_allow_html=True)
@@ -210,17 +222,13 @@ with tab3:
     st.markdown("## 📘 설명란")
     with st.expander("로또네오45 엔진 사용 설명서", expanded=False):
         st.markdown("""
-#### 🔹 1단계: 자동 데이터 확보
-5게임의 자동번호를 A~E 칸에 입력하세요. 숫자는 쉼표(,)로 구분.
+#### 🔹 사용 순서
+1. **탭1 이웃수 계산기** → 직전 회차 당첨번호+보너스 입력 → 핵심/보조 자동분류
+2. **탭3 조합 생성기** → 핵심/보조 자동 연동 확인 → 자동번호 5게임 입력 → 조합 생성!
 
-#### 🔹 2단계: 고수 데이터 대입
-핵심 그룹 / 보조 그룹 번호를 입력하세요.
-
-#### 🔹 3단계: 매칭 및 조합 생성
-황금 비율 (핵심 3 : 보조 2 : 기타 1) 기준으로 5세트 조합 생성.
+#### 🔹 마스터 번호
+왼쪽 사이드바에서 한달에 한번 업데이트하세요.
         """)
 
 st.markdown("---")
-st.caption("💡 탭1: 이웃수 계산기 (매주 사용) | 탭2: 조합 생성기 | 마스터 28개: 한달 고정")
-
-# 탭2 추천번호 매칭 삽입용 플래그
+st.caption("💡 탭1 이웃수 → 탭3 자동연동 | 마스터 28개: 한달 고정 | 매주 당첨번호만 입력!")
