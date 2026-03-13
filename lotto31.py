@@ -2,11 +2,11 @@ import streamlit as st
 import random
 
 # 1. 페이지 설정
-st.set_page_config(page_title="로또네오45 - 1209회 실전", layout="wide")
+st.set_page_config(page_title="로또네오45", layout="wide")
 
 st.markdown("""
     <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
-        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 로또네오45 베타버전 (1209회)</h1>
+        <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 로또네오45 베타버전</h1>
         <p style="color: #333; font-size: 1.2rem; font-weight: bold;">[ 실시간 자동 매칭 & 데이터 분석 시스템 ]</p>
     </div>
 """, unsafe_allow_html=True)
@@ -26,10 +26,9 @@ with col1:
     if unique_auto:
         st.success(f"📋 추출된 유니크 번호: {unique_auto}")
 
-# --- [Step 2] 오른쪽: 1209회 전략 번호 대입 (수정 완료) ---
+# --- [Step 2] 오른쪽: 전략 번호 대입 ---
 with col2:
-    # 사용자님의 요청대로 제목을 수정했습니다.
-    st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **1209회 전략 번호 대입**</span>", unsafe_allow_html=True)
+    st.markdown("### 🎯 <span style='font-size: 1.4rem;'>Step 2. **이번 주 전략 번호 대입**</span>", unsafe_allow_html=True)
     
     user_core = st.text_input("💎 **핵심 그룹 (고수 다수 추천)**", value="5, 26, 27, 29, 30, 34, 45", key="final_v1_core")
     user_support = st.text_input("🌿 **보조 그룹 (보험용 추천)**", value="1, 2, 10, 12, 15, 16, 17, 20, 21, 44", key="final_v1_support")
@@ -48,8 +47,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 버튼 로직과 들여쓰기를 완벽하게 정리했습니다.
-    if st.button("🚀 1209회 황금 조합 생성", type="primary", use_container_width=True):
+    if st.button("🚀 황금 조합 생성", type="primary", use_container_width=True):
         if not unique_auto:
             st.error("먼저 Step 1에 자동 번호를 입력해주세요!")
         else:
@@ -68,11 +66,9 @@ with col2:
                     final_combos.append(sorted(res))
                 except: continue
             
-            st.subheader("✨ 생성된 1209회 조합")
+            st.subheader("✨ 생성된 조합")
             for i, combo in enumerate(final_combos, 1):
                 st.info(f"**조합 {i:02d}:** {combo}")
-
-
 
 
 st.markdown("## 📘 설명란")
@@ -84,49 +80,19 @@ with st.expander("로또네오45 엔진 사용 설명서", expanded=False):
 새로 구매한 자동이나 유튜브에 차고넘치는 자동중 골라서 **5게임의 자동번호를 A~E 칸에 입력**하세요.
 
 **중요 포인트**  
-- 숫자는 반드시 **쉼표(,)** 로 구분해야 엔진이 인식합니다.  
-  (예: `2, 8, 17, 27, 30, 35`)
+- 숫자는 반드시 **쉼표(,)** 로 구분해야 엔진이 인식합니다.
 
 **분석 효과**  
-- 입력 즉시 중복이 제거된 **유니크 번호**가 자동 추출됩니다.  
-- 이 숫자들이 이후 모든 분석의 **기초 데이터**가 됩니다.
+- 입력 즉시 중복이 제거된 **유니크 번호**가 자동 추출됩니다.
 
 ---
 
 #### 🔹 2단계: 고수 데이터 대입
-**핵심 그룹**  
-- 고수 추천 번호 중 **확신도가 높거나 가장 많이 언급된 번호**는 현재 미리 분석해서 정리했습니다.
-
-**보조 그룹**  
-- 빈도는 낮지만 **보험용으로 가져갈 번호**들을 미리분석해서 입력 해놨습니다.
-
-**유연성**  
-- 번호 개수는 고정되어 있지 않습니다.  
-- 더 많이 입력해도 엔진이 자동으로 최적 계산을 수행합니다.
+**핵심 그룹** - 확신도가 높은 번호  
+**보조 그룹** - 보험용 번호
 
 ---
 
 #### 🔹 3단계: 매칭 및 조합 생성
-**매칭 확인**  
-- ✅ 매칭 핵심수 = **[자동 번호] ∩ [고수 추천]**  
-- 가장 우선적으로 사용되는 강력한 후보입니다.
-
-**조합 생성 방식**  
-- 🔴 조합 생성 버튼을 누르면  
-  **황금 비율 (핵심 3 : 보조 2 : 기타 1)** 기준으로  
-  **실전 선택에 집중할 수 있도록 5세트 조합만 생성**합니다.
-
-**왜 5세트인가?**  
-- 너무 많지 않아 **비교·선택이 쉽고**  
-- 집중도가 높아 **실사용에 적합**하기 때문입니다.
+**황금 비율 (핵심 3 : 보조 2 : 기타 1)** 기준으로 5세트 조합 생성
 """)
-
-
-
-
-
-
-
-
-
-
