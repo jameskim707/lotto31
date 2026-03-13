@@ -34,7 +34,7 @@ with st.sidebar:
 master_set = set(master_list)
 
 # ===== 탭 구조 =====
-tab1, tab2 = st.tabs(["🔢 이웃수 계산기", "🚀 조합 생성기"])
+tab1, tab2, tab3 = st.tabs(["🔢 이웃수 계산기", "🎯 추천번호 매칭", "🚀 조합 생성기"])
 
 # ==========================================
 # TAB 1: 이웃수 계산기 (새로 추가)
@@ -95,10 +95,52 @@ with tab1:
     else:
         st.info("👈 당첨번호와 보너스번호를 입력하면 이웃수가 자동으로 계산됩니다!")
 
+
 # ==========================================
-# TAB 2: 기존 조합 생성기 (손 안 댐)
+# TAB 2: 추천번호 매칭
 # ==========================================
 with tab2:
+    st.markdown("### 🎯 추천번호 매칭")
+    st.caption("추천번호나 예상번호를 넣으면 마스터 28개와 매칭해드려요!")
+
+    rec_input = st.text_area("📋 추천번호 입력 (쉼표로 구분)", placeholder="예: 3, 7, 12, 18, 24, 27, 33, 38, 41, 44", height=80)
+    rec_nums = sorted([int(n.strip()) for n in rec_input.split(',') if n.strip().isdigit()])
+
+    if rec_nums:
+        rec_set = set(rec_nums)
+        matched = sorted(master_set & rec_set)
+        not_matched = sorted(rec_set - master_set)
+
+        st.markdown(f"**📥 입력번호 {len(rec_nums)}개:** {rec_nums}")
+        st.markdown("---")
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown(f"**✅ 마스터 일치 ({len(matched)}개)**")
+            if matched:
+                chips = " ".join([
+                    f'<span style="background:#e94560;color:white;padding:5px 13px;border-radius:20px;margin:3px;display:inline-block;font-weight:bold;font-size:1.1rem;">{n}</span>'
+                    for n in matched
+                ])
+                st.markdown(chips, unsafe_allow_html=True)
+            else:
+                st.warning("일치하는 번호가 없어요")
+
+        with col_b:
+            st.markdown(f"**❌ 마스터 미포함 ({len(not_matched)}개)**")
+            if not_matched:
+                chips = " ".join([
+                    f'<span style="background:#2a2a4a;color:#aaa;padding:5px 13px;border-radius:20px;margin:3px;display:inline-block;font-size:1.1rem;text-decoration:line-through;">{n}</span>'
+                    for n in not_matched
+                ])
+                st.markdown(chips, unsafe_allow_html=True)
+    else:
+        st.info("👈 추천번호를 입력하면 마스터 28개와 매칭해드립니다!")
+
+# ==========================================
+# TAB 3: 기존 조합 생성기 (손 안 댐)
+# ==========================================
+with tab3:
     st.markdown("""
         <div style="text-align: center; border-bottom: 5px solid #ff4b4b; padding-bottom: 20px; margin-bottom: 30px; background-color: #fff5f5; border-radius: 15px;">
             <h1 style="margin: 0; color: #ff4b4b; font-size: 2.5rem; font-weight: 900;">🎰 로또네오45 베타버전</h1>
@@ -180,3 +222,5 @@ with tab2:
 
 st.markdown("---")
 st.caption("💡 탭1: 이웃수 계산기 (매주 사용) | 탭2: 조합 생성기 | 마스터 28개: 한달 고정")
+
+# 탭2 추천번호 매칭 삽입용 플래그
